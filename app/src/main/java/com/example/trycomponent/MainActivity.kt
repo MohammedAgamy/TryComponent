@@ -4,39 +4,103 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import com.example.trycomponent.view.UserListViewModel
 import com.example.trycomponent.ui.theme.TryComponentTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val viewmodel : UserListViewModel by viewModels()
+
         enableEdgeToEdge()
         setContent {
             TryComponentTheme {
                 //RememberMeExample()
-                ContactApp()
+                //ContactApp()
+
+                UserInputScreen(viewmodel)
             }
         }
     }
 }
 
 
+@Composable
+fun UserInputScreen(viewModel: UserListViewModel) {
+    val name by viewModel.name.collectAsState()
+    val email by viewModel.email.collectAsState()
+    val nameError by viewModel.nameError.collectAsState()
+    val emailError by viewModel.emailError.collectAsState()
+
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        // Name input field
+        OutlinedTextField(
+            value = name,
+            onValueChange = { viewModel.updateName(it) },
+            label = { Text("Name") },
+            isError = nameError,
+            supportingText = {
+                if (nameError) {
+                    Text(
+                        "Name cannot be empty",
+                        color = MaterialTheme.colorScheme.error
+                    )  // Show error message
+                }
+            }
+
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+        // Email input field
+        OutlinedTextField(
+            value = email,
+            onValueChange = { viewModel.updateEmail(it) },
+            label = { Text("Email") },
+            isError = emailError,
+            supportingText = {
+                if (emailError) {
+                    Text(
+                        text = if (email.isEmpty()) "Email cannot be empty" else "Invalid email address",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        // Button to add user
+        Button(onClick = { viewModel.addUser() }) {
+            Text("Add User")
+        }
+    }
+}
+
+
+
+
+/*
 @Composable
 fun ContactApp() {
 
@@ -64,7 +128,7 @@ fun ContactApp() {
         }
 
     }
-}
+}*/
 
 /*
 // Local State Management  with checkbox component
